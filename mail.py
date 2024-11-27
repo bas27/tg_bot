@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.dispatcher import FSMContext
 import asyncio
 import secret
@@ -9,6 +10,16 @@ token = secret.token
 bot = Bot(token=token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+kb = ReplyKeyboardMarkup(resize_keyboard=True)
+button_info = KeyboardButton(text='Информация')
+
+button_calc = KeyboardButton(text='Рассчитать')
+kb.row(button_info, button_calc)
+
+
+@dp.message_handler(text='Информация')
+async def info(message):
+    await message.answer('Информация о боте')
 
 class UserState(StatesGroup):
     address = State()
@@ -17,7 +28,7 @@ class UserState(StatesGroup):
     weight = State()
 
 
-@dp.message_handler(text='Calories')
+@dp.message_handler(text='Рассчитать')
 async def set_age(message):
     await message.answer('Введите свой возраст:')
     await UserState.age.set()
@@ -62,7 +73,7 @@ async def fsm_handler(message, state):
 @dp.message_handler(commands=['start'])
 async def start(message):
     print('Привет! Я бот помогающий твоему здоровью.')
-    await message.answer('Привет! Я бот помогающий твоему здоровью.')
+    await message.answer('Привет! Я бот помогающий твоему здоровью.', reply_markup=kb)
 
 
 @dp.message_handler(text=['Привет', 'Пока'])
