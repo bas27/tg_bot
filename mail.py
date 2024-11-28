@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 import asyncio
 import secret
@@ -15,6 +16,24 @@ button_info = KeyboardButton(text='Информация')
 
 button_calc = KeyboardButton(text='Рассчитать')
 kb.row(button_info, button_calc)
+
+inline_kb = InlineKeyboardMarkup()
+button_i = InlineKeyboardButton(text='Информация', callback_data='info')
+inline_kb.add(button_i)
+
+start_menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [button_info],
+        [button_calc,
+         KeyboardButton(text='Параметры')]
+    ],
+    resize_keyboard=True
+)
+
+@dp.callback_query_handler(text='info')
+async def infor(call):
+    await call.message.answer('Информация о боте инлайн')
+    await call.answer()
 
 
 @dp.message_handler(text='Информация')
@@ -73,7 +92,7 @@ async def fsm_handler(message, state):
 @dp.message_handler(commands=['start'])
 async def start(message):
     print('Привет! Я бот помогающий твоему здоровью.')
-    await message.answer('Привет! Я бот помогающий твоему здоровью.', reply_markup=kb)
+    await message.answer('Привет! Я бот помогающий твоему здоровью.', reply_markup=start_menu)
 
 
 @dp.message_handler(text=['Привет', 'Пока'])
