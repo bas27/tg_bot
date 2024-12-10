@@ -100,12 +100,16 @@ async def all_message(message):
 @dp.message_handler(text='Купить')
 async def get_buying_list(message):
     for number in range(1, 5):
+        await message.answer(f'Название: Product{number} | Описание: описание {number} | Цена: {number * 100}')
         with open(f'files/{number}.jpg', 'rb') as f:
-            await message.answer_photo(f,
-                                       caption=f'Название: Product{number} | Описание: описание {number} '
-                                               f'| Цена: {number * 100}')
-            await asyncio.sleep(1)
+            await message.answer_photo(f)
+        await asyncio.sleep(1)
     await message.answer('Выберите продукт для покупки: ', reply_markup=inline_product)
+
+
+@dp.callback_query_handler(text='product_buying')
+async def send_confirm_message(call):
+    await call.message.answer(text='Вы успешно приобрели продукт!')
 
 
 @dp.message_handler()
