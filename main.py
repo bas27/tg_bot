@@ -5,12 +5,17 @@ from aiogram.dispatcher import FSMContext
 import asyncio
 import secret
 from keyboards import *
+from crud_functions import *
 
-
+initiate_db()
 token = secret.token
 bot = Bot(token=token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+
+all_prod = get_all_products()# запрос всех товаров
+if not all_prod:
+    write_product()
 
 @dp.message_handler(text='Рассчитать')
 async def main_menu(message):
@@ -99,9 +104,9 @@ async def all_message(message):
 
 @dp.message_handler(text='Купить')
 async def get_buying_list(message):
-    for number in range(1, 5):
-        await message.answer(f'Название: Product{number} | Описание: описание {number} | Цена: {number * 100}')
-        with open(f'files/{number}.jpg', 'rb') as f:
+    for number in all_prod:
+        await message.answer(f'Название: {number[1]} | Описание: {number[2]} | Цена: {number[3]}')
+        with open(f'files/{number[0]}.jpg', 'rb') as f:
             await message.answer_photo(f)
         await asyncio.sleep(1)
     await message.answer('Выберите продукт для покупки: ', reply_markup=inline_product)
