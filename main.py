@@ -97,10 +97,23 @@ async def all_message(message):
     await message.answer('Привет!')
 
 
+@dp.message_handler(text='Купить')
+async def get_buying_list(message):
+    for number in range(1, 5):
+        with open(f'files/{number}.jpg', 'rb') as f:
+            await message.answer_photo(f,
+                                       caption=f'Название: Product{number} | Описание: описание {number} '
+                                               f'| Цена: {number * 100}')
+            await asyncio.sleep(1)
+    await message.answer('Выберите продукт для покупки: ', reply_markup=inline_product)
+
+
 @dp.message_handler()
 async def all_message(message):
     print('Введите команду /start, чтобы начать общение.')
     await message.answer('Введите команду /start, чтобы начать общение.')
+
+
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
