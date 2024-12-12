@@ -11,7 +11,7 @@ def initiate_db():
                 price INT NOT NULL)'''
               )
     c.execute('''CREATE TABLE IF NOT EXISTS Users(
-                id INT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL,
                 email TEXT NOT NULL,
                 age INT NOT NULL,
@@ -55,8 +55,7 @@ def add_user(username, email, age):
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     if not is_included(username):
-        c.execute('INSERT INTO Users VALUES(?, ?, ?, ?, ?)', (f'{len(get_all_products()) + 1}',
-                                                              f'{username}', f'{email}', f'{age}', 1000))
+        c.execute('INSERT INTO Users (username, email, age, balance) VALUES(?, ?, ?, ?)', (f'{username}', f'{email}', f'{age}', 1000))
     else:
         print('Такой пользователь уже существует')
     conn.commit()

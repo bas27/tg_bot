@@ -12,10 +12,52 @@ token = secret.token
 bot = Bot(token=token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-
-all_prod = get_all_products()# запрос всех товаров
+all_prod = get_all_products()  # запрос всех товаров
 if not all_prod:
     write_product()
+
+
+class RegistrationState(StatesGroup):
+    username = State()
+    email = State()
+    age = State()
+    balance = State()
+
+
+@dp.message_handler(text='Регистрация')
+async def sing_up(message):
+    await message.answer(text='Введите имя пользователя (только латинский алфавит): ')
+    await RegistrationState.username.set()
+    # print(await state.get_data)  # добавить проверку на ввод латинского алфавита
+
+
+@dp.message_handler(state=RegistrationState.username)
+async def set_username(message, state):
+    if is_included(message.text):
+        await message.answer('Пользователь существует, введите другое имя')
+        await RegistrationState.username.set()
+    elif not is_included(message.text):
+        await state.update_data(username=message.text)
+        await message.answer('Введите свой email:')
+        await RegistrationState.email.set()
+        # print(message.text)
+
+
+@dp.message_handler(state=RegistrationState.email)
+async def set_email(message, state):
+    await state.update_data(email=message.text)
+    await message.answer('Введите свой возраст:')
+    await RegistrationState.age.set()
+
+
+@dp.message_handler(state=RegistrationState.age)
+async def set_age(message, state):
+    await state.update_data(age=message.text)
+    user_data = await state.get_data()
+    # print(user_data)
+    add_user(user_data['username'], user_data['email'], user_data['age'])
+    await state.finish()
+
 
 @dp.message_handler(text='Рассчитать')
 async def main_menu(message):
@@ -37,6 +79,15 @@ async def infor(call):
 @dp.message_handler(text='Информация')
 async def info(message):
     await message.answer('Информация о боте')
+
+
+# ===================
+'''
+Цепочка получения данных для вычисления каллорий
+'''
+
+
+# ===================
 
 
 class UserState(StatesGroup):
@@ -75,6 +126,9 @@ async def send_calories(message, state):
     await state.finish()
 
 
+# ===================
+
+
 @dp.message_handler(text='Заказать')
 async def buy(message):
     await message.answer('Отправь нам свой адрес, пожалуйста')
@@ -104,7 +158,8 @@ async def all_message(message):
 
 @dp.message_handler(text='Купить')
 async def get_buying_list(message):
-    for number in all_prod:
+    get_prod = get_all_products()
+    for number in get_prod:
         await message.answer(f'Название: {number[1]} | Описание: {number[2]} | Цена: {number[3]}')
         with open(f'files/{number[0]}.jpg', 'rb') as f:
             await message.answer_photo(f)
@@ -121,7 +176,6 @@ async def send_confirm_message(call):
 async def all_message(message):
     print('Введите команду /start, чтобы начать общение.')
     await message.answer('Введите команду /start, чтобы начать общение.')
-
 
 
 if __name__ == '__main__':
